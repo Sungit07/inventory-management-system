@@ -89,7 +89,13 @@ export interface Return {
   orderId: string;
   orderNumber: string;
   customerId: string;
-  status: "INITIATED" | "IN_TRANSIT" | "RECEIVED" | "INSPECTED" | "REFUNDED" | "REJECTED";
+  status:
+    | "INITIATED"
+    | "IN_TRANSIT"
+    | "RECEIVED"
+    | "INSPECTED"
+    | "REFUNDED"
+    | "REJECTED";
   items: ReturnItem[];
   refundAmount: number;
   inspectionNotes?: string;
@@ -134,10 +140,15 @@ class DatabaseService {
         this.useCosmos = true;
         console.log("DatabaseService: Connected to Azure Cosmos DB");
       } catch (err) {
-        console.error("DatabaseService: Failed to connect to Azure Cosmos DB. Using local memory.", err);
+        console.error(
+          "DatabaseService: Failed to connect to Azure Cosmos DB. Using local memory.",
+          err,
+        );
       }
     } else {
-      console.log("DatabaseService: Azure Cosmos DB credentials not found. Using local in-memory fallback.");
+      console.log(
+        "DatabaseService: Azure Cosmos DB credentials not found. Using local in-memory fallback.",
+      );
     }
 
     this.seedLocalDb();
@@ -175,9 +186,9 @@ class DatabaseService {
         lastLoginAt: new Date().toISOString(),
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-      }
+      },
     ];
-    seedUsers.forEach(u => this.users.set(u.id, u));
+    seedUsers.forEach((u) => this.users.set(u.id, u));
 
     // 2. Seed Products
     const seedProducts: Product[] = [
@@ -189,12 +200,19 @@ class DatabaseService {
         category: "Electronics",
         brand: "ProTech",
         barcode: "074586321904",
-        dimensions: { weightKg: 1.4, widthCm: 32.2, heightCm: 1.8, depthCm: 21.4 },
-        images: ["https://stinventorydev.blob.core.windows.net/products/elec-lap-001-primary.jpg"],
+        dimensions: {
+          weightKg: 1.4,
+          widthCm: 32.2,
+          heightCm: 1.8,
+          depthCm: 21.4,
+        },
+        images: [
+          "https://stinventorydev.blob.core.windows.net/products/elec-lap-001-primary.jpg",
+        ],
         baseSellingPrice: 999.99,
         isActive: true,
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
       },
       {
         id: "ELEC-MOU-002",
@@ -204,12 +222,17 @@ class DatabaseService {
         category: "Electronics",
         brand: "ClickSoft",
         barcode: "074586321905",
-        dimensions: { weightKg: 0.1, widthCm: 12.0, heightCm: 4.5, depthCm: 7.0 },
+        dimensions: {
+          weightKg: 0.1,
+          widthCm: 12.0,
+          heightCm: 4.5,
+          depthCm: 7.0,
+        },
         images: [],
         baseSellingPrice: 49.99,
         isActive: true,
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
       },
       {
         id: "OFFC-CHR-003",
@@ -219,15 +242,20 @@ class DatabaseService {
         category: "Furniture",
         brand: "ComfortSeat",
         barcode: "074586321906",
-        dimensions: { weightKg: 15.0, widthCm: 65.0, heightCm: 120.0, depthCm: 60.0 },
+        dimensions: {
+          weightKg: 15.0,
+          widthCm: 65.0,
+          heightCm: 120.0,
+          depthCm: 60.0,
+        },
         images: [],
         baseSellingPrice: 249.99,
         isActive: true,
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      }
+        updatedAt: new Date().toISOString(),
+      },
     ];
-    seedProducts.forEach(p => this.products.set(p.sku, p));
+    seedProducts.forEach((p) => this.products.set(p.sku, p));
 
     // 3. Seed Inventory
     const seedInventory: InventoryItem[] = [
@@ -238,12 +266,12 @@ class DatabaseService {
         location: "Aisle 4, Shelf C, Bin 12",
         quantity: 145,
         reorderLevel: 20,
-        costPrice: 650.00,
+        costPrice: 650.0,
         sellingPrice: 999.99,
         status: "IN_STOCK",
         lastStockTakeDate: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        updatedBy: "usr_admin"
+        updatedBy: "usr_admin",
       },
       {
         id: "inv_WH-EAST-01_ELEC-MOU-002",
@@ -252,12 +280,12 @@ class DatabaseService {
         location: "Aisle 2, Shelf B, Bin 3",
         quantity: 8,
         reorderLevel: 15,
-        costPrice: 20.00,
+        costPrice: 20.0,
         sellingPrice: 49.99,
         status: "LOW_STOCK",
         lastStockTakeDate: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        updatedBy: "usr_admin"
+        updatedBy: "usr_admin",
       },
       {
         id: "inv_WH-WEST-02_OFFC-CHR-003",
@@ -266,15 +294,15 @@ class DatabaseService {
         location: "Aisle 8, Shelf F, Bin 1",
         quantity: 0,
         reorderLevel: 5,
-        costPrice: 120.00,
+        costPrice: 120.0,
         sellingPrice: 249.99,
         status: "OUT_OF_STOCK",
         lastStockTakeDate: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        updatedBy: "usr_admin"
-      }
+        updatedBy: "usr_admin",
+      },
     ];
-    seedInventory.forEach(i => this.inventory.set(i.id, i));
+    seedInventory.forEach((i) => this.inventory.set(i.id, i));
 
     // 4. Seed Orders
     const seedOrders: Order[] = [
@@ -290,8 +318,8 @@ class DatabaseService {
             name: "Enterprise Laptop v14",
             quantity: 5,
             unitPrice: 999.99,
-            totalPrice: 4999.95
-          }
+            totalPrice: 4999.95,
+          },
         ],
         totalAmount: 4999.95,
         shippingAddress: {
@@ -299,11 +327,11 @@ class DatabaseService {
           city: "Redmond",
           state: "WA",
           zipCode: "98052",
-          country: "USA"
+          country: "USA",
         },
         trackingNumber: "1Z999AA10123456784",
         createdAt: "2026-06-25T10:00:00Z",
-        updatedAt: "2026-06-28T14:30:00Z"
+        updatedAt: "2026-06-28T14:30:00Z",
       },
       {
         id: "ord_02K65UVW",
@@ -317,22 +345,22 @@ class DatabaseService {
             name: "Ergonomic Wireless Mouse",
             quantity: 10,
             unitPrice: 49.99,
-            totalPrice: 499.90
-          }
+            totalPrice: 499.9,
+          },
         ],
-        totalAmount: 4999.95,
+        totalAmount: 499.9,
         shippingAddress: {
           street: "410 Terry Ave N",
           city: "Seattle",
           state: "WA",
           zipCode: "98109",
-          country: "USA"
+          country: "USA",
         },
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      }
+        updatedAt: new Date().toISOString(),
+      },
     ];
-    seedOrders.forEach(o => this.orders.set(o.id, o));
+    seedOrders.forEach((o) => this.orders.set(o.id, o));
 
     // 5. Seed Returns
     const seedReturns: Return[] = [
@@ -348,17 +376,17 @@ class DatabaseService {
             sku: "ELEC-LAP-001",
             quantity: 1,
             reason: "Defective screen backlight",
-            condition: "DAMAGED"
-          }
+            condition: "DAMAGED",
+          },
         ],
         refundAmount: 999.99,
         inspectionNotes: "Confirmed backlight flickering. Processed refund.",
         inspectedBy: "usr_admin",
         createdAt: "2026-06-29T09:00:00Z",
-        updatedAt: "2026-06-30T16:00:00Z"
-      }
+        updatedAt: "2026-06-30T16:00:00Z",
+      },
     ];
-    seedReturns.forEach(r => this.returns.set(r.id, r));
+    seedReturns.forEach((r) => this.returns.set(r.id, r));
 
     // 6. Seed Audit Logs
     this.auditLogs.push({
@@ -371,12 +399,20 @@ class DatabaseService {
       entityId: "ord_01J54XYZ",
       entityType: "ORDER",
       changes: { status: { old: null, new: "PENDING" } },
-      ipAddress: "127.0.0.1"
+      ipAddress: "127.0.0.1",
     });
   }
 
   // Generic audit logging helper
-  public logAction(userId: string, email: string, action: string, entityId: string, entityType: string, changes: any, ip: string = "127.0.0.1") {
+  public logAction(
+    userId: string,
+    email: string,
+    action: string,
+    entityId: string,
+    entityType: string,
+    changes: any,
+    ip: string = "127.0.0.1",
+  ) {
     const timestamp = new Date().toISOString();
     const createdMonth = timestamp.slice(0, 7); // YYYY-MM
     const log: AuditLog = {
@@ -389,10 +425,12 @@ class DatabaseService {
       entityId,
       entityType,
       changes,
-      ipAddress: ip
+      ipAddress: ip,
     };
     this.auditLogs.unshift(log); // Keep newest logs at the start
-    console.log(`[AUDIT LOG] ${action} by ${email} on ${entityType} ID: ${entityId}`);
+    console.log(
+      `[AUDIT LOG] ${action} by ${email} on ${entityType} ID: ${entityId}`,
+    );
   }
 }
 
