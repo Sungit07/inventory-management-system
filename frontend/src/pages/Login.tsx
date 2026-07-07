@@ -9,7 +9,7 @@ export const Login: React.FC = () => {
 
   const handleRoleSelect = (role: "ADMIN" | "MANAGER" | "OPERATOR") => {
     login(role);
-    navigate("/");
+    navigate("/dashboard");
   };
 
   return (
@@ -21,8 +21,12 @@ export const Login: React.FC = () => {
           <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-blue-600 font-black text-xl text-white shadow-lg shadow-blue-500/20 mb-3">
             I
           </div>
-          <h2 className="text-2xl font-bold tracking-tight text-white">Enterprise IMS</h2>
-          <p className="text-sm text-slate-400 mt-1">Select a role profile to access the inventory system</p>
+          <h2 className="text-2xl font-bold tracking-tight text-white">
+            Enterprise IMS
+          </h2>
+          <p className="text-sm text-slate-400 mt-1">
+            Select a role profile to access the inventory system
+          </p>
         </div>
 
         <div className="space-y-4">
@@ -34,8 +38,12 @@ export const Login: React.FC = () => {
               <Shield className="w-5 h-5 text-blue-400 group-hover:text-white" />
             </div>
             <div>
-              <p className="font-semibold text-white group-hover:text-blue-400 transition-colors">Admin Profile</p>
-              <p className="text-xs text-slate-400">Full operations, user controls, and system logs</p>
+              <p className="font-semibold text-white group-hover:text-blue-400 transition-colors">
+                Admin Profile
+              </p>
+              <p className="text-xs text-slate-400">
+                Full operations, user controls, and system logs
+              </p>
             </div>
           </button>
 
@@ -47,8 +55,12 @@ export const Login: React.FC = () => {
               <Briefcase className="w-5 h-5 text-emerald-400 group-hover:text-white" />
             </div>
             <div>
-              <p className="font-semibold text-white group-hover:text-emerald-400 transition-colors">Manager Profile</p>
-              <p className="text-xs text-slate-400">Inventory control, order processing, and analytics</p>
+              <p className="font-semibold text-white group-hover:text-emerald-400 transition-colors">
+                Manager Profile
+              </p>
+              <p className="text-xs text-slate-400">
+                Inventory control, order processing, and analytics
+              </p>
             </div>
           </button>
 
@@ -60,15 +72,20 @@ export const Login: React.FC = () => {
               <UserCheck className="w-5 h-5 text-purple-400 group-hover:text-white" />
             </div>
             <div>
-              <p className="font-semibold text-white group-hover:text-purple-400 transition-colors">Operator (Staff) Profile</p>
-              <p className="text-xs text-slate-400">Stock updates, barcode scans, and return intake</p>
+              <p className="font-semibold text-white group-hover:text-purple-400 transition-colors">
+                Operator (Staff) Profile
+              </p>
+              <p className="text-xs text-slate-400">
+                Stock updates, barcode scans, and return intake
+              </p>
             </div>
           </button>
         </div>
 
         <div className="mt-8 pt-6 border-t border-slate-800/80 text-center">
           <p className="text-xs text-slate-500">
-            Enterprise Cloud Auth (Azure Entra ID SSO) is bypassed in local development mode.
+            Enterprise Cloud Auth (Azure Entra ID SSO) is bypassed in local
+            development mode.
           </p>
         </div>
       </div>

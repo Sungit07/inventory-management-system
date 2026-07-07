@@ -414,7 +414,9 @@ class DatabaseService {
     ip: string = "127.0.0.1",
   ) {
     const timestamp = new Date().toISOString();
-    const createdMonth = timestamp.slice(0, 7); // YYYY-MM
+
+    const createdMonth = timestamp.slice(0, 7);
+
     const log: AuditLog = {
       id: "log_" + Math.random().toString(36).substring(2, 11).toUpperCase(),
       createdMonth,
@@ -427,10 +429,12 @@ class DatabaseService {
       changes,
       ipAddress: ip,
     };
-    this.auditLogs.unshift(log); // Keep newest logs at the start
-    console.log(
-      `[AUDIT LOG] ${action} by ${email} on ${entityType} ID: ${entityId}`,
-    );
+
+    console.log("ADDING LOG:", log); // <-- ADD THIS
+
+    this.auditLogs.unshift(log);
+
+    console.log("TOTAL LOGS:", this.auditLogs.length); // <-- ADD THIS
   }
 }
 
