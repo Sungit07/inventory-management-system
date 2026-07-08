@@ -1,12 +1,13 @@
 import { CosmosClient } from "@azure/cosmos";
+import bcrypt from "bcryptjs";
 
-// Interfaces mirroring the database schemas
 export interface User {
   id: string;
   email: string;
   displayName: string;
   role: "ADMIN" | "MANAGER" | "OPERATOR";
   isActive: boolean;
+  passwordHash: string;
   lastLoginAt: string;
   createdAt: string;
   updatedAt: string;
@@ -122,7 +123,7 @@ class DatabaseService {
   private cosmosClient?: CosmosClient;
   private databaseId = "inventory-db";
 
-  // In-Memory Database fallback stores
+  
   public users: Map<string, User> = new Map();
   public products: Map<string, Product> = new Map();
   public inventory: Map<string, InventoryItem> = new Map();
@@ -155,7 +156,7 @@ class DatabaseService {
   }
 
   private seedLocalDb() {
-    // 1. Seed Users
+    
     const seedUsers: User[] = [
       {
         id: "usr_admin",
@@ -163,6 +164,7 @@ class DatabaseService {
         displayName: "Admin User",
         role: "ADMIN",
         isActive: true,
+        passwordHash: bcrypt.hashSync("Admin@123", 10),
         lastLoginAt: new Date().toISOString(),
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -173,6 +175,7 @@ class DatabaseService {
         displayName: "Manager User",
         role: "MANAGER",
         isActive: true,
+        passwordHash: bcrypt.hashSync("Manager@123", 10),
         lastLoginAt: new Date().toISOString(),
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -183,6 +186,7 @@ class DatabaseService {
         displayName: "Operator User",
         role: "OPERATOR",
         isActive: true,
+        passwordHash: bcrypt.hashSync("Operator@123", 10), 
         lastLoginAt: new Date().toISOString(),
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -404,17 +408,16 @@ class DatabaseService {
   }
 
   // Generic audit logging helper
-  public logAction(
+public logAction(
     userId: string,
     email: string,
     action: string,
     entityId: string,
     entityType: string,
     changes: any,
-    ip: string = "127.0.0.1",
+    ip: string = "127.0.0.1"
   ) {
     const timestamp = new Date().toISOString();
-
     const createdMonth = timestamp.slice(0, 7);
 
     const log: AuditLog = {
@@ -430,12 +433,18 @@ class DatabaseService {
       ipAddress: ip,
     };
 
-    console.log("ADDING LOG:", log); // <-- ADD THIS
-
+    console.log("ADDING LOG:", log);
     this.auditLogs.unshift(log);
-
-    console.log("TOTAL LOGS:", this.auditLogs.length); // <-- ADD THIS
+    console.log("TOTAL LOGS:", this.auditLogs.length);
+  } 
+  public findUserByEmail(email: string): User | undefined {
+    return Array.from(this.users.values()).find(
+      (u) => u.email.toLowerCase() === email.toLowerCase()
+    );
   }
-}
+
+  public findUserById(id: string): User | undefined {
+    return this.users.get(id);
+  }
 
 export const db = new DatabaseService();

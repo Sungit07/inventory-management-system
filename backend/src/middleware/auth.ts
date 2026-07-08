@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from "express";
+import jwt from "jsonwebtoken";
 import { db } from "../services/db";
 
 export interface AuthenticatedRequest extends Request {
@@ -11,55 +12,56 @@ export interface AuthenticatedRequest extends Request {
 }
 
 export const authMiddleware = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-  // 1. Check for standard Authorization Header (Entra ID integration)
   const authHeader = req.headers.authorization;
-  
-  if (authHeader && authHeader.startsWith("Bearer ")) {
-    const token = authHeader.split(" ")[1];
-    
-    // Test tokens
-    if (token === "admin-token") {
-      req.user = { id: "usr_admin", email: "admin@enterprise.com", displayName: "Admin User", role: "ADMIN" };
-      return next();
-    } else if (token === "manager-token") {
-      req.user = { id: "usr_manager", email: "manager@enterprise.com", displayName: "Manager User", role: "MANAGER" };
-      return next();
-    } else if (token === "operator-token") {
-      req.user = { id: "usr_operator", email: "operator@enterprise.com", displayName: "Operator User", role: "OPERATOR" };
-      return next();
+
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    // Dev-only convenience for testing protected routes from Postman
+    // without generating a real JWT. Disabled automatically in production.
+    if (process.env.NODE_ENV !== "production") {
+      const mockUserId = req.headers["x-mock-user-id"] as string;
+      if (mockUserId) {
+        const localUser = db.users.get(mockUserId);
+        if (localUser) {
+          req.user = {
+            id: localUser.id,
+            email: localUser.email,
+            displayName: localUser.displayName,
+            role: localUser.role,
+          };
+          return next();
+        }
+      }
     }
-    
-    try {
-      // Decode a simulated JSON-base64 token for custom local payloads
-      const decoded = JSON.parse(Buffer.from(token, 'base64').toString('utf-8'));
-      req.user = {
-        id: decoded.oid || decoded.id || "usr_unknown",
-        email: decoded.email || decoded.upn || "unknown@enterprise.com",
-        displayName: decoded.name || "Default User",
-        role: (decoded.roles && decoded.roles[0]) || "OPERATOR"
-      };
-      return next();
-    } catch (err) {
-      return res.status(401).json({ error: "Invalid token format." });
-    }
+    return res.status(401).json({ error: "Access denied. No authentication token provided." });
   }
 
-  // 2. Local Fallback Headers (helps simple dev testing using Postman)
-  const mockUserId = req.headers["x-mock-user-id"] as string;
-  const mockUserRole = req.headers["x-mock-user-role"] as string;
+  const token = authHeader.split(" ")[1];
+  const secret = process.env.JWT_SECRET;
 
-  if (mockUserId && mockUserRole) {
-    const localUser = db.users.get(mockUserId);
-    if (localUser) {
-      req.user = {
-        id: localUser.id,
-        email: localUser.email,
-        displayName: localUser.displayName,
-        role: mockUserRole as any
-      };
-      return next();
-    }
+  if (!secret) {
+    return res.status(500).json({ error: "Server misconfiguration: JWT_SECRET is not set." });
   }
 
-  return res.status(401).json({ error: "Access denied. Authentication token or mock headers required." });
+  try {
+    const decoded = jwt.verify(token, secret) as {
+      id: string;
+      email: string;
+      role: "ADMIN" | "MANAGER" | "OPERATOR";
+    };
+
+    const user = db.users.get(decoded.id);
+    if (!user || !user.isActive) {
+      return res.status(401).json({ error: "Account not found or deactivated." });
+    }
+
+    req.user = {
+      id: user.id,
+      email: user.email,
+      displayName: user.displayName,
+      role: user.role,
+    };
+    return next();
+  } catch {
+    return res.status(401).json({ error: "Invalid or expired token." });
+  }
 };
