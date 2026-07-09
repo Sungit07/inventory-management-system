@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
+import API from "../services/api";
 
 export interface User {
   id: string;
@@ -10,14 +11,16 @@ export interface User {
 interface AuthContextType {
   user: User | null;
   token: string | null;
-  login: (role: "ADMIN" | "MANAGER" | "OPERATOR") => void;
+  login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   isLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -33,25 +36,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(false);
   }, []);
 
-  const login = (role: "ADMIN" | "MANAGER" | "OPERATOR") => {
-    let mockUser: User;
-    let mockToken = "";
+  const login = async (email: string, password: string) => {
+    const response = await API.post("/auth/login", {
+      email,
+      password,
+    });
 
-    if (role === "ADMIN") {
-      mockUser = { id: "usr_admin", email: "admin@enterprise.com", displayName: "Admin User", role: "ADMIN" };
-      mockToken = "admin-token";
-    } else if (role === "MANAGER") {
-      mockUser = { id: "usr_manager", email: "manager@enterprise.com", displayName: "Manager User", role: "MANAGER" };
-      mockToken = "manager-token";
-    } else {
-      mockUser = { id: "usr_operator", email: "operator@enterprise.com", displayName: "Operator User", role: "OPERATOR" };
-      mockToken = "operator-token";
-    }
+    const { token, user } = response.data;
 
-    setToken(mockToken);
-    setUser(mockUser);
-    localStorage.setItem("ims_token", mockToken);
-    localStorage.setItem("ims_user", JSON.stringify(mockUser));
+    setToken(token);
+    setUser(user);
+
+    localStorage.setItem("ims_token", token);
+    localStorage.setItem("ims_user", JSON.stringify(user));
   };
 
   const logout = () => {

@@ -1,15 +1,30 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { Shield, Briefcase, UserCheck } from "lucide-react";
 
 export const Login: React.FC = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleRoleSelect = (role: "ADMIN" | "MANAGER" | "OPERATOR") => {
-    login(role);
-    navigate("/dashboard");
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      setLoading(true);
+      setError("");
+
+      await login(email, password);
+
+      navigate("/dashboard");
+    } catch (err: any) {
+      setError(err.response?.data?.error || "Login failed.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -25,68 +40,64 @@ export const Login: React.FC = () => {
             Enterprise IMS
           </h2>
           <p className="text-sm text-slate-400 mt-1">
-            Select a role profile to access the inventory system
+            Sign in to access the Enterprise Inventory Management System
           </p>
         </div>
 
-        <div className="space-y-4">
-          <button
-            onClick={() => handleRoleSelect("ADMIN")}
-            className="flex items-center gap-4 w-full p-4 rounded-xl bg-slate-950 border border-slate-800 hover:border-blue-500/50 hover:bg-blue-600/5 transition-all duration-200 group text-left"
-          >
-            <div className="w-10 h-10 rounded-lg bg-blue-600/10 flex items-center justify-center border border-blue-500/20 group-hover:bg-blue-600 group-hover:text-white transition-colors duration-200">
-              <Shield className="w-5 h-5 text-blue-400 group-hover:text-white" />
+        <form onSubmit={handleLogin} className="space-y-5">
+          <div>
+            <label className="block text-sm mb-2 text-slate-300">Email</label>
+
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="admin@enterprise.com"
+              className="w-full rounded-xl bg-slate-950 border border-slate-800 px-4 py-3"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm mb-2 text-slate-300">
+              Password
+            </label>
+
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="********"
+              className="w-full rounded-xl bg-slate-950 border border-slate-800 px-4 py-3"
+              required
+            />
+          </div>
+
+          {error && (
+            <div className="rounded-lg bg-red-500/10 border border-red-500/30 p-3 text-red-400 text-sm">
+              {error}
             </div>
-            <div>
-              <p className="font-semibold text-white group-hover:text-blue-400 transition-colors">
-                Admin Profile
-              </p>
-              <p className="text-xs text-slate-400">
-                Full operations, user controls, and system logs
-              </p>
-            </div>
-          </button>
+          )}
 
           <button
-            onClick={() => handleRoleSelect("MANAGER")}
-            className="flex items-center gap-4 w-full p-4 rounded-xl bg-slate-950 border border-slate-800 hover:border-emerald-500/50 hover:bg-emerald-600/5 transition-all duration-200 group text-left"
+            type="submit"
+            disabled={loading}
+            className="w-full rounded-xl bg-blue-600 hover:bg-blue-700 py-3 font-semibold"
           >
-            <div className="w-10 h-10 rounded-lg bg-emerald-600/10 flex items-center justify-center border border-emerald-500/20 group-hover:bg-emerald-600 group-hover:text-white transition-colors duration-200">
-              <Briefcase className="w-5 h-5 text-emerald-400 group-hover:text-white" />
-            </div>
-            <div>
-              <p className="font-semibold text-white group-hover:text-emerald-400 transition-colors">
-                Manager Profile
-              </p>
-              <p className="text-xs text-slate-400">
-                Inventory control, order processing, and analytics
-              </p>
-            </div>
+            {loading ? "Signing In..." : "Sign In"}
           </button>
-
-          <button
-            onClick={() => handleRoleSelect("OPERATOR")}
-            className="flex items-center gap-4 w-full p-4 rounded-xl bg-slate-950 border border-slate-800 hover:border-purple-500/50 hover:bg-purple-600/5 transition-all duration-200 group text-left"
-          >
-            <div className="w-10 h-10 rounded-lg bg-purple-600/10 flex items-center justify-center border border-purple-500/20 group-hover:bg-purple-600 group-hover:text-white transition-colors duration-200">
-              <UserCheck className="w-5 h-5 text-purple-400 group-hover:text-white" />
-            </div>
-            <div>
-              <p className="font-semibold text-white group-hover:text-purple-400 transition-colors">
-                Operator (Staff) Profile
-              </p>
-              <p className="text-xs text-slate-400">
-                Stock updates, barcode scans, and return intake
-              </p>
-            </div>
-          </button>
-        </div>
+        </form>
 
         <div className="mt-8 pt-6 border-t border-slate-800/80 text-center">
-          <p className="text-xs text-slate-500">
-            Enterprise Cloud Auth (Azure Entra ID SSO) is bypassed in local
-            development mode.
-          </p>
+          <div className="text-xs text-slate-500 space-y-1">
+            <p>Development Accounts</p>
+
+            <p>Admin → admin@enterprise.com / Admin@123</p>
+
+            <p>Manager → manager@enterprise.com / Manager@123</p>
+
+            <p>Operator → operator@enterprise.com / Operator@123</p>
+          </div>
         </div>
       </div>
     </div>
